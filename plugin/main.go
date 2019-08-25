@@ -9,15 +9,18 @@ import (
 type myPlugin struct {
 }
 
-func (_ *myPlugin) OnStart(ctx actor.Context) {
+func (_ *myPlugin) OnStart(ctx actor.ReceiverContext) {
 	log.Printf("Middleware: starting %s\n", ctx.Self().Id)
 }
 
-func (_ *myPlugin) OnOtherMessage(ctx actor.Context, msg interface{}) {
+func (_ *myPlugin) OnOtherMessage(ctx actor.ReceiverContext, env *actor.MessageEnvelope) {
+	_, msg, _ := actor.UnwrapEnvelope(env)
 	log.Printf("Middleware: received %#v\n", msg)
 }
 
 func main() {
+	rootContext := actor.EmptyRootContext
+
 	// Construct plugin implementation
 	myPlugin := &myPlugin{}
 
@@ -31,12 +34,12 @@ func main() {
 	// 2019/08/25 12:17:18 Middleware: received &actor.Stopped{}
 	// 2019/08/25 12:17:18 Actor: received &actor.Stopped{}
 	props := actor.
-		FromFunc(func(ctx actor.Context) {
+		PropsFromFunc(func(ctx actor.Context) {
 			log.Printf("Actor: received %#v\n", ctx.Message())
 		}).
-		WithMiddleware(middleware) // Set as a middleware
+		WithReceiverMiddleware(middleware) // Set as a middleware
 
-	pid := actor.Spawn(props)
-	pid.Tell("dummy message")
-	pid.GracefulStop() // Waits till the target actor actually stops
+	pid := rootContext.Spawn(props)
+	rootContext.Send(pid, "dummy message")
+	rootContext.StopFuture(pid).Wait() // Waits till the target actor actually stops
 }
