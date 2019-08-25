@@ -68,3 +68,9 @@ Execution of `go run plugin/main.go` will output log messages somewhat like belo
 2019/08/25 12:17:18 Middleware: received &actor.Stopped{}
 2019/08/25 12:17:18 Actor: received &actor.Stopped{}
 ```
+
+# Other Example Codes
+- [oklahomer/protoactor-go-sender-example](https://github.com/oklahomer/protoactor-go-sender-example)
+  - Some example codes to illustrate how protoactor-go refers to sender process
+- [oklahomer/protoactor-go-future-example](https://github.com/oklahomer/protoactor-go-future-example)
+  - Some example codes to illustrate how protoactor-go handles Future process
