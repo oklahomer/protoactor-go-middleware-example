@@ -51,8 +51,8 @@ Execution of `go run example/main.go` will output log messages somewhat like bel
 ```
 
 # Plugin
-While `example/main.go` shows how a regular middleware works, `plugin/main.go` describes how a middleware construction with [`plugin`](https://github.com/AsynkronIT/protoactor-go/blob/3992780c0af683deb5ec3746f4ec5845139c6e42/plugin/plugin.go) mechanism runs.
-This kind of middleware construction is especially used in `protoactor-go` to build setup a [`PassivationPlugin`](https://github.com/AsynkronIT/protoactor-go/blob/3992780c0af683deb5ec3746f4ec5845139c6e42/plugin/passivation.go).
+While `example/main.go` shows how a regular middleware works, `plugin/main.go` describes how a middleware construction with [`plugin`](https://github.com/AsynkronIT/protoactor-go/blob/bab29b9c335d46ad2f0ffaafdec40300eea16115/plugin/plugin.go) mechanism runs.
+This kind of middleware construction is especially used in `protoactor-go` to build setup a [`PassivationPlugin`](https://github.com/AsynkronIT/protoactor-go/blob/bab29b9c335d46ad2f0ffaafdec40300eea16115/plugin/passivation.go).
 `PassivationPlugin` is a designated middleware that runs a initialization code on actor start and runs another logic on other message receptions.
 This is mainly used to let a cluster grain start a timer on actor initialization, reset the timer on every message reception and stop the actor when no message comes before the timer ticks.
 Remember that, in protoactor's cluster grain architecture, Cluster Grains always "exist."
