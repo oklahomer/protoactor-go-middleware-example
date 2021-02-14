@@ -19,7 +19,8 @@ func (_ *myPlugin) OnOtherMessage(ctx actor.ReceiverContext, env *actor.MessageE
 }
 
 func main() {
-	rootContext := actor.EmptyRootContext
+	// Setup actor system
+	system := actor.NewActorSystem()
 
 	// Construct plugin implementation
 	myPlugin := &myPlugin{}
@@ -39,7 +40,7 @@ func main() {
 		}).
 		WithReceiverMiddleware(middleware) // Set as a middleware
 
-	pid := rootContext.Spawn(props)
-	rootContext.Send(pid, "dummy message")
-	rootContext.StopFuture(pid).Wait() // Waits till the target actor actually stops
+	pid := system.Root.Spawn(props)
+	system.Root.Send(pid, "dummy message")
+	system.Root.StopFuture(pid).Wait() // Waits till the target actor actually stops
 }

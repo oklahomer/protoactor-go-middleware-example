@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"syscall"
 	"time"
 )
 
@@ -39,8 +38,10 @@ type ping struct{}
 type pong struct{}
 
 func main() {
-	rootContext := actor.EmptyRootContext
+	// Setup actor system
+	system := actor.NewActorSystem()
 
+	// Run a pong actor that receives ping payload and send back pong payload.
 	pongProps := actor.
 		PropsFromFunc(func(ctx actor.Context) {
 			switch ctx.Message().(type) {
@@ -48,8 +49,10 @@ func main() {
 				ctx.Respond(&pong{})
 			}
 		})
-	pongPid, _ := rootContext.SpawnNamed(pongProps, "pong")
+	pongPid, _ := system.Root.SpawnNamed(pongProps, "pong")
 
+	// Run a ping actor with nested receiver middlewares and one sender middleware.
+	//
 	// Output should be somewhat like below.
 	// Because ping actor receives both signal of struct{}{} and a pong message of &pong{},
 	// the printed number of execution is doubled comparing to that of pong actor.
@@ -132,23 +135,23 @@ func main() {
 		}).
 		WithSenderMiddleware(newSenderMiddleware())
 
-	pingPid, _ := rootContext.SpawnNamed(pingProps, "ping")
+	pingPid, _ := system.Root.SpawnNamed(pingProps, "ping")
 
+	// Subscribe to signal to finish interaction
 	finish := make(chan os.Signal, 1)
-	signal.Notify(finish, syscall.SIGINT)
-	signal.Notify(finish, syscall.SIGTERM)
+	signal.Notify(finish, os.Interrupt, os.Kill)
 
+	// Periodically send ping payload till signal comes
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
-
 	for {
 		select {
 		case <-ticker.C:
-			rootContext.Send(pingPid, struct{}{})
+			system.Root.Send(pingPid, struct{}{})
 
 		case <-finish:
-			rootContext.StopFuture(pingPid).Wait()
-			rootContext.StopFuture(pingPid).Wait()
+			system.Root.StopFuture(pingPid).Wait()
+			system.Root.StopFuture(pongPid).Wait()
 			log.Print("Finish")
 			return
 
